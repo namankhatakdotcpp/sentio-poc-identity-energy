@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sentio Video Processing</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --line: #dce3f0;
+      --text: #182230;
+      --muted: #5d6b7d;
+      --primary: #2563eb;
+      --primary-2: #1d4ed8;
+      --danger: #dc2626;
+      --success: #059669;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: radial-gradient(circle at top right, #e9eefb 0%, var(--bg) 45%, #eef2f8 100%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 860px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 20px 35px rgba(31, 56, 92, 0.08);
+      overflow: hidden;
+    }
+
+    .head {
+      padding: 22px 24px 16px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #fbfcff 0%, #f7f9fe 100%);
+    }
+
+    .head h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.2px;
+    }
+
+    .head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .body {
+      display: grid;
+      gap: 18px;
+      padding: 22px 24px 24px;
+    }
+
+    .upload-zone {
+      border: 1px dashed #99acd3;
+      border-radius: 12px;
+      background: #f9fbff;
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .upload-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      padding: 10px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .preview-wrap {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0f172a;
+      position: relative;
+    }
+
+    .preview-wrap.active { display: block; }
+
+    video {
+      width: 100%;
+      max-height: 260px;
+      display: block;
+      background: #000;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      border: 0;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 11px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    button:hover { background: var(--primary-2); }
+    button:active { transform: translateY(1px); }
+    button:disabled {
+      cursor: not-allowed;
+      background: #90a7df;
+      transform: none;
+    }
+
+    .status {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fcfdff;
+      gap: 10px;
+    }
+
+    .status.active {
+      display: grid;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .progress {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #e8edf8;
+      overflow: hidden;
+    }
+
+    .bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #2563eb 0%, #4f85f8 100%);
+      transition: width 0.25s ease;
+    }
+
+    .pulse {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--primary);
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+      animation: pulse 1.2s infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
+
+    .result {
+      display: none;
+      border: 1px solid #cde9dc;
+      border-radius: 12px;
+      background: #f4fcf8;
+      padding: 14px;
+      gap: 10px;
+    }
+
+    .result.active {
+      display: grid;
+    }
+
+    .result h2 {
+      margin: 0;
+      font-size: 17px;
+      color: var(--success);
+    }
+
+    .meta {
+      margin: 0;
+      color: #27403a;
+      font-size: 14px;
+    }
+
+    .downloads {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .link-btn {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #a8c3ea;
+      color: #173b76;
+      background: #ebf3ff;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 9px 11px;
+      border-radius: 9px;
+      min-width: 150px;
+    }
+
+    .link-btn:hover {
+      background: #dceafe;
+    }
+
+    .error {
+      display: none;
+      border: 1px solid #f4c8c8;
+      border-radius: 12px;
+      background: #fff5f5;
+      color: #7f1d1d;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .error.active { display: block; }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+      word-break: break-word;
+      margin: 0;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: #4c5d74;
+      background: #f8faff;
+      border: 1px solid #e2e9f5;
+      border-radius: 8px;
+      padding: 8px;
+      overflow-wrap: anywhere;
+      margin: 0;
+    }
+
+    @media (max-width: 640px) {
+      .head h1 { font-size: 19px; }
+      .body { padding: 16px; }
+      .link-btn { min-width: 100%; }
+      .actions button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell" role="main">
+    <section class="head">
+      <h1>Sentio Identity + Energy</h1>
+      <p>Upload a video and process it using the existing FastAPI endpoint: <span class="mono">POST /process-video/</span></p>
+    </section>
+
+    <section class="body">
+      <div class="upload-zone">
+        <div class="upload-top">
+          <span class="label">Video Upload</span>
+          <span class="hint">Accepted: .mp4 .mov .avi .mkv .webm .m4v</span>
+        </div>
+        <input id="videoFile" type="file" accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-m4v" />
+
+        <div id="previewWrap" class="preview-wrap" aria-live="polite">
+          <video id="videoPreview" controls></video>
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" type="button">Process Video</button>
+        </div>
+      </div>
+
+      <section id="statusBox" class="status" aria-live="polite">
+        <div class="row">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="pulse" aria-hidden="true"></span>
+            <strong id="statusText">Processing...</strong>
+          </div>
+          <span id="percentText">0%</span>
+        </div>
+        <div class="progress" aria-hidden="true">
+          <div id="progressBar" class="bar"></div>
+        </div>
+        <p class="small">This progress is estimated while waiting for the backend response.</p>
+      </section>
+
+      <section id="resultBox" class="result" aria-live="polite">
+        <h2>Processing Completed</h2>
+        <p id="timeMeta" class="meta"></p>
+        <p id="jobMeta" class="meta"></p>
+        <div class="downloads">
+          <a id="reportLink" class="link-btn" href="#" target="_blank" rel="noopener">Open report.html</a>
+          <a id="jsonLink" class="link-btn" href="#" target="_blank" rel="noopener">Open integration_output.json</a>
+          <a id="csvLink" class="link-btn" href="#" target="_blank" rel="noopener">Open CSV file</a>
+        </div>
+        <p id="pathsDump" class="mono"></p>
+      </section>
+
+      <section id="errorBox" class="error" aria-live="assertive"></section>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      var API_URL = window.location.hostname === "127.0.0.1"
+        ? "http://127.0.0.1:8000/process-video/"
+        : "/process-video/";
+      var videoInput = document.getElementById('videoFile');
+      var submitBtn = document.getElementById('submitBtn');
+      var previewWrap = document.getElementById('previewWrap');
+      var videoPreview = document.getElementById('videoPreview');
+
+      var statusBox = document.getElementById('statusBox');
+      var statusText = document.getElementById('statusText');
+      var percentText = document.getElementById('percentText');
+      var progressBar = document.getElementById('progressBar');
+
+      var resultBox = document.getElementById('resultBox');
+      var errorBox = document.getElementById('errorBox');
+      var timeMeta = document.getElementById('timeMeta');
+      var jobMeta = document.getElementById('jobMeta');
+      var pathsDump = document.getElementById('pathsDump');
+
+      var reportLink = document.getElementById('reportLink');
+      var jsonLink = document.getElementById('jsonLink');
+      var csvLink = document.getElementById('csvLink');
+
+      var progressTimer = null;
+      var progressValue = 0;
+      var previewUrl = '';
+
+      function resetUI() {
+        hideError();
+        resultBox.classList.remove('active');
+      }
+
+      function showError(message) {
+        errorBox.textContent = message;
+        errorBox.classList.add('active');
+      }
+
+      function hideError() {
+        errorBox.classList.remove('active');
+        errorBox.textContent = '';
+      }
+
+      function startLoading() {
+        statusBox.classList.add('active');
+        statusText.textContent = 'Processing...';
+        progressValue = 0;
+        setProgress(0);
+
+        if (progressTimer) clearInterval(progressTimer);
+        progressTimer = setInterval(function () {
+          if (progressValue < 92) {
+            var step = progressValue < 30 ? 6 : progressValue < 65 ? 3 : 1;
+            progressValue = Math.min(92, progressValue + step);
+            setProgress(progressValue);
+          }
+        }, 300);
+      }
+
+      function finishLoading() {
+        setProgress(100);
+        statusText.textContent = 'Completed';
+        if (progressTimer) {
+          clearInterval(progressTimer);
+          progressTimer = null;
+        }
+        setTimeout(function () {
+          statusBox.classList.remove('active');
+        }, 350);
+      }
+
+      function stopLoadingWithError() {
+        if (progressTimer) {
+          clearInterval(progressTimer);
+          progressTimer = null;
+        }
+        statusBox.classList.remove('active');
+      }
+
+      function setProgress(value) {
+        progressBar.style.width = value + '%';
+        percentText.textContent = value + '%';
+      }
+
+      function setBusy(isBusy) {
+        submitBtn.disabled = isBusy;
+        submitBtn.textContent = isBusy ? 'Processing...' : 'Process Video';
+      }
+
+      function normalizePathForLink(path) {
+        if (!path) return '#';
+        if (/^https?:\/\//i.test(path)) return path;
+        if (/^file:\/\//i.test(path)) return path;
+        if (path.charAt(0) === '/') return path;
+        return path;
+      }
+
+      function setResultLinks(data) {
+        reportLink.href = normalizePathForLink(data.report_path);
+        jsonLink.href = normalizePathForLink(data.json_path);
+        csvLink.href = normalizePathForLink(data.csv_path);
+      }
+
+      videoInput.addEventListener('change', function () {
+        resetUI();
+
+        var file = videoInput.files && videoInput.files[0];
+        if (!file) {
+          previewWrap.classList.remove('active');
+          if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            previewUrl = '';
+          }
+          return;
+        }
+
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = URL.createObjectURL(file);
+        videoPreview.src = previewUrl;
+        previewWrap.classList.add('active');
+      });
+
+      submitBtn.addEventListener('click', function () {
+        hideError();
+        resultBox.classList.remove('active');
+
+        var file = videoInput.files && videoInput.files[0];
+        if (!file) {
+          showError('Please select a video file before processing.');
+          return;
+        }
+
+        var formData = new FormData();
+        formData.append('file', file);
+
+        setBusy(true);
+        startLoading();
+
+        fetch(API_URL, {
+          method: 'POST',
+          body: formData
+        })
+        .then(function (response) {
+          return response.json().then(function (json) {
+            if (!response.ok) {
+              var detail = json && json.detail ? json.detail : 'Processing failed.';
+              throw new Error(detail);
+            }
+            return json;
+          }).catch(function () {
+            if (!response.ok) {
+              throw new Error('Unexpected API response.');
+            }
+            throw new Error('Unable to parse API response JSON.');
+          });
+        })
+        .then(function (data) {
+          finishLoading();
+          setResultLinks(data);
+
+          timeMeta.textContent = 'Processing time: ' + Number(data.processing_time_sec).toFixed(3) + ' sec';
+          jobMeta.textContent = 'Job ID: ' + data.job_id;
+          pathsDump.textContent =
+            'report_path: ' + data.report_path + '\n' +
+            'json_path:   ' + data.json_path + '\n' +
+            'csv_path:    ' + data.csv_path;
+
+          resultBox.classList.add('active');
+        })
+        .catch(function (err) {
+          stopLoadingWithError();
+          showError(err.message || 'Video processing failed.');
+        })
+        .finally(function () {
+          setBusy(false);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

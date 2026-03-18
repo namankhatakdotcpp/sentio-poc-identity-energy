@@ -1,0 +1,36 @@
+{
+  "detector": {
+    "skip_n": 4,
+    "max_frames": 300,
+    "min_upscale_size": 112,
+    "min_face_confidence": 0.8
+  },
+  "matcher": {
+    "similarity_threshold": 0.6,
+    "embedding_min_size": 112,
+    "window_size": 5,
+    "max_missed": 3,
+    "decay": 0.88,
+    "boost": 0.12,
+    "min_track_confidence": 0.15,
+    "association_min_score": 0.33,
+    "iou_weight": 0.45,
+    "center_weight": 0.25,
+    "embedding_weight": 0.3
+  },
+  "energy": {
+    "brightness_weight": 0.35,
+    "eye_weight": 0.3,
+    "motion_weight": 0.35,
+    "eye_fallback": 50.0
+  },
+  "runtime": {
+    "realtime": false,
+    "no_display": false,
+    "write_demo_video": true
+  },
+  "logging": {
+    "level": "INFO",
+    "fmt": "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+  }
+}

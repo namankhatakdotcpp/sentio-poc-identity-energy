@@ -1,0 +1,4 @@
+id,name,energy_score,brightness,eye_openness,motion,frames,time_range_start,time_range_end,avg_match_confidence,avg_track_confidence,verdict
+SM_P0001,UNKNOWN_002,69.74,56.95,49.35,100.0,4,130,160,0.0,0.556,MEDIUM
+SM_P0002,UNKNOWN_001,61.62,53.32,50.0,79.89,1,115,115,0.0,0.55,MEDIUM
+SM_P0003,UNKNOWN_003,53.54,53.82,50.0,56.3,1,160,160,0.0,0.55,MEDIUM

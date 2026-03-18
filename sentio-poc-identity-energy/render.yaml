@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sentio-ai
+    env: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: LOG_LEVEL
+        value: "INFO"
+      - key: MAX_UPLOAD_MB
+        value: "200"
+      - key: PROCESS_TIMEOUT_SEC
+        value: "1200"

@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# ML junk
+*.dat
+*.dylib
+*.h5
+*.pt
+*.pth
+
+# models
+models/
+known_faces/*.dat
