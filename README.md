@@ -1,90 +1,250 @@
-# sentio-poc-identity-energy
+# 🚀 SentioMind — Face Recognition Video Intelligence System
 
-Production-style POC pipeline for identity recognition and per-person energy scoring from classroom/CCTV video.
+> Transforming raw video into intelligent insights using real-time face detection, recognition, and tracking.
 
-## Features
+---
 
-- Reference encoding from `known_faces/` using `face_recognition`
-- Face detection with `MTCNN`
-- Low-resolution face handling (bicubic upscale for faces below 112px)
-- Identity matching using cosine similarity
-- Temporal identity smoothing (rolling window of last 5 frames)
-- Unknown labeling (`UNKNOWN_001`, `UNKNOWN_002`, ...)
-- Energy scoring from:
-  - Brightness
-  - Eye openness (MediaPipe FaceMesh EAR)
-  - Motion (Farneback optical flow)
-- Multi-frame aggregation per person
-- Sharpest profile crop selection via Laplacian variance
-- Offline HTML report generation
-- JSON integration output with strict schema
-- Optional annotated `demo.mp4`
+## 📌 Overview
 
-## Repository Layout
+**SentioMind** is an end-to-end AI pipeline that processes videos to:
 
-```text
-sentio-poc-identity-energy/
-├── known_faces/
-├── data/
-│   └── video_sample_1.mov
-├── src/
-│   ├── encoder.py
-│   ├── detector.py
-│   ├── matcher.py
-│   ├── energy.py
-│   ├── aggregator.py
-│   └── reporter.py
-├── outputs/
-│   ├── report.html
-│   ├── integration_output.json
-│   └── profile_crops/
-├── solution.py
-├── requirements.txt
-└── README.md
+* 🎯 Detect faces in each frame
+* 🧠 Recognize known identities
+* 🔁 Track individuals across frames
+* 🎬 Generate annotated demo videos
+* 📊 Produce structured analytics
+
+Built with a production-first mindset, this system mimics real-world AI video intelligence platforms used in surveillance, analytics, and smart environments.
+
+---
+
+## ⚙️ Tech Stack
+
+| Component        | Technology               |
+| ---------------- | ------------------------ |
+| Backend          | FastAPI                  |
+| Face Detection   | `face_recognition` (HOG) |
+| Face Recognition | dlib embeddings          |
+| Video Processing | OpenCV                   |
+| ML Utilities     | NumPy                    |
+| Server           | Uvicorn                  |
+
+---
+
+## 🧠 System Architecture
+
+```
+Video Input
+     ↓
+Frame Extraction
+     ↓
+Face Detection (HOG)
+     ↓
+Face Encoding (128-d embeddings)
+     ↓
+Identity Matching (Euclidean Distance)
+     ↓
+Tracking + Aggregation
+     ↓
+Annotated Video + Reports
 ```
 
-## Setup
+---
 
-1. Use Python 3.10+.
-2. Install dependencies:
+## 📁 Project Structure
+
+```
+sentio-poc-identity-energy/
+│
+├── api.py                  # FastAPI entrypoint
+├── solution.py             # Main pipeline orchestration
+├── requirements.txt
+├── README.md
+│
+├── src/
+│   ├── detector.py         # Face detection logic
+│   ├── face_identity.py    # Face recognition & matching
+│
+├── known_faces/            # Reference images (input identities)
+│   ├── naman.jpg
+│   ├── dheeraj.jpg
+│
+└── outputs/
+    ├── demo.mp4            # Annotated output video
+    ├── report.json         # Structured results
+```
+
+---
+
+## 🚀 Features
+
+### 🎯 Face Detection
+
+* Uses HOG-based detection for CPU efficiency
+* Works reliably on real-world video input
+
+### 🧠 Face Recognition
+
+* Encodes faces into 128D embeddings
+* Matches using similarity threshold
+* Supports multiple known identities
+
+### 🎬 Demo Video Rendering
+
+* Bounding boxes (green/red)
+* Identity labels with confidence
+* FPS counter
+* Clean UI overlays
+
+### 📊 Analytics Output
+
+* Number of people detected
+* Frame-wise detections
+* Identity aggregation
+
+---
+
+## 🧪 Local Setup
+
+### 1️⃣ Clone Repository
+
+```bash
+git clone https://github.com/your-username/sentio-poc-identity-energy.git
+cd sentio-poc-identity-energy
+```
+
+---
+
+### 2️⃣ Create Virtual Environment
+
+```bash
+python -m venv venv
+source venv/bin/activate   # Mac/Linux
+```
+
+---
+
+### 3️⃣ Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Put one image per known person in `known_faces/`.
-4. Put input video at `data/video_sample_1.mov`.
+---
 
-## Run
+### 4️⃣ Add Known Faces
+
+Place images inside:
+
+```
+known_faces/
+```
+
+Example:
+
+```
+known_faces/naman.jpg
+known_faces/dheeraj.jpg
+```
+
+---
+
+### 5️⃣ Run Server
 
 ```bash
-python solution.py \
-  --known_faces known_faces \
-  --video data/video_sample_1.mov \
-  --output_dir outputs
+uvicorn api:app --reload
 ```
 
-## Outputs
+---
 
-- `outputs/report.html` (offline report)
-- `outputs/integration_output.json` (strict integration schema)
-- `outputs/demo.mp4` (annotated preview; optional)
-- `outputs/profile_crops/*.jpg` (best profile per identity)
+### 6️⃣ Open API Docs
 
-## JSON Output Schema
+```
+http://127.0.0.1:8000/docs
+```
+
+---
+
+### 7️⃣ Test with Video Upload
+
+Use `/process-video/` endpoint to upload a video.
+
+---
+
+## 📈 Sample Output
+
+### 🎬 Demo Video
+
+* Annotated with bounding boxes
+* Identity labels + confidence
+* Smooth playback
+
+### 📊 JSON Output
 
 ```json
-[
-  {
-    "id": "SM_P0001",
-    "name": "John Doe",
-    "energy_score": 61.25,
-    "brightness": 58.20,
-    "eye_openness": 70.10,
-    "motion": 55.80,
-    "frames": 18,
-    "time_range": [35, 214],
-    "profile_image_base64": "..."
-  }
-]
+{
+  "persons_found": 2,
+  "identities": ["naman", "dheeraj"],
+  "frames_processed": 28
+}
 ```
+
+---
+
+## ⚡ Performance
+
+| Metric          | Value                       |
+| --------------- | --------------------------- |
+| Processing Time | ~3–5 sec per frame          |
+| Detection Speed | CPU optimized               |
+| Accuracy        | Depends on lighting & angle |
+
+---
+
+## ⚠️ Limitations
+
+* Sensitive to lighting conditions
+* HOG detector less robust than deep models
+* Requires clear frontal faces
+
+---
+
+## 🔮 Future Improvements
+
+* 🔥 Deep learning detector (RetinaFace / YOLO)
+* ⚡ Real-time webcam support
+* 🌐 Web UI dashboard
+* 📊 Advanced analytics (heatmaps, timelines)
+* ☁️ Cloud deployment (AWS / Render)
+
+---
+
+## 👨‍💻 Author
+
+**Naman**
+AI/ML Developer | System Builder
+
+---
+
+## ⭐ Why This Project Stands Out
+
+* End-to-end ML system (not just a model)
+* Real-world pipeline (video → insights)
+* Production-style architecture
+* Clean visualization output
+
+---
+
+## 📬 Contributing
+
+Feel free to fork, improve, and submit PRs!
+
+---
+
+## 🏁 Final Note
+
+> This project demonstrates the transition from "model building" to "system engineering" — the key skill for real-world AI roles.
+
+---
+
+🔥 *If you like this project, give it a star!*
