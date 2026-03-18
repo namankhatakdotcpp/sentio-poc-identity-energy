@@ -201,6 +201,128 @@ Use `/process-video/` endpoint to upload a video.
 
 ---
 
+## 🍎 Environment Setup (Mac - M1/M2/M3)
+
+### ⚠️ Important
+
+This project uses `face_recognition` and `dlib`, which require native dependencies.
+
+---
+
+### 1️⃣ Install System Dependencies (Mac)
+
+```bash
+brew install cmake
+brew install boost
+brew install dlib
+```
+
+---
+
+### 2️⃣ Create Virtual Environment
+
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+---
+
+### 3️⃣ Upgrade pip
+
+```bash
+pip install --upgrade pip
+```
+
+---
+
+### 4️⃣ Install Python Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 5️⃣ Verify Installation ✅
+
+Run:
+
+```bash
+python -c "import face_recognition, cv2, fastapi; print('✅ Setup OK')"
+```
+
+If you see:
+
+```
+✅ Setup OK
+```
+
+→ Everything is working correctly.
+
+---
+
+### ❌ Common Errors & Fixes
+
+#### 1. `ModuleNotFoundError: No module named 'face_recognition'`
+
+👉 Fix:
+
+```bash
+pip install face-recognition
+```
+
+---
+
+#### 2. dlib installation fails
+
+👉 Fix:
+
+```bash
+brew install cmake boost
+pip install dlib
+```
+
+---
+
+#### 3. Using wrong Python environment
+
+👉 Always activate venv:
+
+```bash
+source venv/bin/activate
+```
+
+---
+
+### 💡 Pro Tip
+
+Never push your virtual environment:
+
+```
+venv/
+```
+
+Instead, always use:
+
+```bash
+pip freeze > requirements.txt
+```
+
+---
+
+### 🧠 Why This Matters
+
+This ensures:
+
+* ✅ Clean dependency management
+* ✅ Reproducible setup
+* ✅ No large files in GitHub
+* ✅ Smooth deployment
+
+---
+
+
 ## ⚠️ Limitations
 
 * Sensitive to lighting conditions
